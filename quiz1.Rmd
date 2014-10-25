@@ -1,0 +1,154 @@
+---
+title: "Quiz 1"
+author: "Liam Damewood"
+date: "September 3, 2014"
+output: html_document
+---
+
+### Question 1
+```{r,echo=F}
+rm(list = ls())
+```
+Consider the data set given below
+```{r}
+x <- c(0.18, -1.54, 0.42, 0.95)
+```
+And weights given by
+```{r}
+w <- c(2, 1, 3, 1)
+```
+Give the value of $\mu$ that minimizes the least squares equation $\sum^n_{i=1}w_i(x_i−\mu)^2$
+
+```{r}
+# Manual method
+mu <- sum(w*x)/sum(w)
+round(mu,4)
+# Alternate method:
+lm(x ~ 1, weights = w)$coefficients
+```
+
+### Question 2
+```{r,echo=F}
+rm(list = ls())
+```
+Consider the following data set
+
+```{r}
+x <- c(0.8, 0.47, 0.51, 0.73, 0.36, 0.58, 0.57, 0.85, 0.44, 0.42)
+y <- c(1.39, 0.72, 1.55, 0.48, 1.19, -1.59, 1.23, -0.65, 1.49, 0.05)
+```
+Fit the regression through the origin and get the slope treating `y` as the outcome and `x` as the regressor. (Hint, do not center the data since we want regression through the origin, not through the means of the data.)
+```{r}
+lm(y ~ 0 + x)$coefficients
+```
+
+### Question 3
+```{r,echo=F}
+rm(list = ls())
+```
+Do `data(mtcars)` from the datasets package and fit the regression model with mpg as the outcome and weight as the predictor. Give the slope coefficient.
+```{r}
+data(mtcars)
+lm(mpg ~ wt, data = mtcars)$coefficients
+```
+
+### Question 4
+Consider data with an outcome (Y) and a predictor (X). The standard deviation of the predictor is one half that of the outcome. The correlation between the two variables is .5. What value would the slope coefficient for the regression model with $Y$ as the outcome and $X$ as the predictor?
+
+$$
+\begin{align}
+\hat \beta_1
+ &= Cor(X,Y) \frac{Sd(Y)}{Sd(X)} \\
+ &= (0.5) \frac{Sd(Y)}{0.5Sd(Y)} \\
+ &= 1
+\end{align}
+$$
+
+### Question 5
+```{r,echo=F}
+rm(list = ls())
+```
+Students were given two hard tests and scores were normalized to have empirical mean 0 and variance 1. The correlation between the scores on the two tests was 0.4. What would be the expected score on Quiz 2 for a student who had a normalized score of 1.5 on Quiz 1?
+
+$$
+\begin{align}
+\hat \beta_1
+ &= Cor(X,Y) \frac{Sd(Y)}{Sd(X)} \\
+ &= (0.4) 1.0 / 1.0
+ &= 0.4
+\end{align}
+$$
+
+```{r}
+1.5 * 0.4
+```
+
+### Question 6
+```{r,echo=F}
+rm(list = ls())
+```
+Consider the data given by the following
+
+```{r}
+x <- c(8.58, 10.46, 9.01, 9.64, 8.86)
+```
+What is the value of the first measurement if x were normalized (to have mean 0 and variance 1)?
+```{r}
+xbar = (x - mean(x)) / sd(x)
+xbar[1]
+```
+
+### Question 7
+```{r,echo=F}
+rm(list = ls())
+```
+Consider the following data set (used above as well). What is the intercept for fitting the model with x as the predictor and y as the outcome?
+
+```{r}
+x <- c(0.8, 0.47, 0.51, 0.73, 0.36, 0.58, 0.57, 0.85, 0.44, 0.42)
+y <- c(1.39, 0.72, 1.55, 0.48, 1.19, -1.59, 1.23, -0.65, 1.49, 0.05)
+```
+
+```{r}
+lm(y ~ x)$coefficients
+```
+
+### Question 8
+You know that both the predictor and response have mean 0. What can be said about the intercept when you fit a linear regression?
+
+ * It must be exactly one.
+ * It must be identically 0. <--
+ * Nothing about the intercept can be said from the information given.
+ * It is undefined as you have to divide by zero.
+ 
+### Question 9
+```{r,echo=F}
+rm(list = ls())
+```
+Consider the data given by
+
+```{r}
+x <- c(0.8, 0.47, 0.51, 0.73, 0.36, 0.58, 0.57, 0.85, 0.44, 0.42)
+```
+What value minimizes the sum of the squared distances between these points and itself?
+
+```{r}
+mean(x)
+```
+
+### Question 10
+Consider taking the slope having fit Y as the outcome and X as the predictor, $\beta_1$ and the slope from fitting X as the outcome and Y as the predictor, $\gamma_1$, and dividing the two as $\beta_1/\gamma_1$. What is this ratio always equal to?
+
+$$
+\begin{align}
+\beta_1  &= \frac{\sum_i X_i Y_i}{\sum_i Y_i^2} \\
+\gamma_1 &= \frac{\sum_i X_i Y_i}{\sum_i X_i^2} \\
+\frac{\beta_1}{\gamma_1} &= \frac{\sum_i Y_i^2}{\sum_i X_i^2} \\
+ &= \frac{Var(X)}{Var(Y)}
+\end{align}
+$$
+
+ * Cor(Y,X)
+ * 1
+ * 2SD(Y)/SD(X)
+ * Var(Y)/Var(X) <--

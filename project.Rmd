@@ -1,0 +1,102 @@
+---
+title: "Impact of Automatic and Manual Transmission on MPG"
+author: "Liam Damewood"
+date: "September 21, 2014"
+output: pdf_document
+---
+
+# Summary
+
+1. Is an automatic or manual transmission better for MPG?
+2. Quantify the MPG difference between automatic and manual transmissions
+
+The answer to #1 is: Manual, in general, but it depends on the weight of the vehicle. For lighter vehicles (under 2800 lbs.) manual gives better mpg, while automatic gives better mpg for heavier vehicles.
+
+# The dataset
+
+The `mtcars` dataset has the following variables:
+
+* [, 1]  mpg	Miles/(US) gallon
+* [, 2]	cyl	Number of cylinders
+* [, 3]	disp	Displacement (cu.in.)
+* [, 4]	hp	Gross horsepower
+* [, 5]	drat	Rear axle ratio
+* [, 6]	wt	Weight (lb/1000)
+* [, 7]	qsec	1/4 mile time
+* [, 8]	vs	V/S
+* [, 9]	am	Transmission (0 = automatic, 1 = manual)
+* [,10]	gear	Number of forward gears
+* [,11]	carb	Number of carburetors
+
+```{r}
+data(mtcars)
+mtcars$vs <- as.factor(mtcars$vs)
+mtcars$am[mtcars$am == 0] <- "Automatic"
+mtcars$am[mtcars$am == 1] <- "Manual"
+mtcars$am <- as.factor(mtcars$am)
+mtcars$gear <- as.factor(mtcars$gear)
+mtcars$carb <- as.factor(mtcars$carb)
+```
+
+# Comparing mpg for the two transmission types
+
+By comparing the mean mpg for the two types of transmission, it is clear that manual transmission is better for mpg overall, so the answer for question #1 is "Manual". Below, I plot the bar distribution of the automatic and manual transmissions showing that the mean mpg for manual transmission is `r mean(mtcars$mpg[mtcars$am == "Manual"])` and the mean mpg for automatic transmission is `r mean(mtcars$mpg[mtcars$am == "Automatic"])`. The model for the transmission type alone is
+$$
+mpg_i = \beta_1 + \beta_2 am_i + \epsilon_i
+$$
+where $am_i=1$ for manual transmission and $am_i=0$ for automatic. This model simply compares the average mpg for the automatic ($\beta_1$) to the average mpg for manual transmission ($\beta_1+\beta_2$)
+
+```{r}
+plot(mtcars$am, mtcars$mpg)
+fit1 <- lm(mpg ~ am, mtcars)
+summary(fit1)$coef
+```
+
+# Weight
+
+This picture does not account for factors such as weight, horsepower or number of cylinders. First, I consider the interaction of the weight with the transmission type. The linear model is
+$$
+mpg_i = \beta_1 + \beta_2 am_i + \beta_3 wt_i + \beta_4 am_i wt_i + \epsilon_i.
+$$
+The best fit lines are
+$$
+\begin{aligned}
+E[mpg] &= \hat\beta_1 + \hat\beta_3 wt \\
+E[mpg] &= (\hat\beta_1+\hat\beta_2) + (\hat\beta_3+\hat\beta_4) wt
+\end{aligned}
+$$
+for automatic and manual transmissions, respectively. The data and best fit lines are shown below. Next the residuals
+
+```{r}
+fit2 <- lm(mpg ~ am * wt, mtcars)
+plot(mtcars$wt, mtcars$mpg, pch=19)
+points(mtcars$wt,mtcars$mpg,pch=19,col=((mtcars$am=="Manual")*1+1))
+abline(c(fit2$coeff[1],fit2$coeff[3]),col="black",lwd=3)
+abline(c(fit2$coeff[1] + fit2$coeff[2],fit2$coeff[3] + fit2$coeff[4]),col="red",lwd=3)
+legend("topright", c("Manual", "Automatic"), pch = 19, col = c(2,1))
+summary(fit2)$coef
+plot(predict(fit2), resid(fit2))
+```
+
+Clearly, the weight plays a significant factor in determining the mpg. Below around 3000 pounds, the manual transmission is better for mpg while it is better for automatic transmission above. The precise weight is the intersection of the best fit lines at $wt = -\hat\beta_2/\hat\beta_4 = `r -fit2$coef[2]/fit2$coef[4]` \times 1000$ lbs.
+
+# Horsepower
+
+Another factor that may effect the mpg is the horsepower. The new model is 
+$$
+mpg_i = \beta_1 + \beta_2 am_i + \beta_3 wt_i + \beta_4 hp_i^\alpha + \beta_5 am_i wt_i + \epsilon_i
+$$
+where I have used $\alpha = 1/2$.
+
+```{r}
+alpha = 1./2
+fit3 <- lm(mpg ~ am * wt + I(hp^alpha), mtcars)
+summary(fit3)$coef
+plot(predict(fit3), resid(fit3))
+```
+
+To compare the models, I use the nested model testing, which shows that the horsepower is significant ($P < 0.05$).
+
+```{r}
+anova(fit1, fit2, fit3)
+```
